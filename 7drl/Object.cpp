@@ -4,6 +4,7 @@
 
 Object::Object(void)
 {
+	currentRoom=NULL;
 }
 
 

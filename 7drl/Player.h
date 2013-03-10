@@ -9,5 +9,7 @@ public:
 
 	virtual bool update( int key );
 
+	virtual void draw();
+
 };
 

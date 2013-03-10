@@ -11,7 +11,9 @@ using namespace std;
 #include <set>
 #include "Object.h"
 #include "Player.h"
+#include "Room.h"
 set<Object*> objects;
+set<Room*> rooms;
 Console console;
 COORD coord(int x,int y)
 {
@@ -29,25 +31,22 @@ int _tmain(int argc, _TCHAR* argv[])
 	console.console.push_back("3sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg3");
 	console.console.push_back("4sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg4");
 	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");
-	objects.insert(new Player(40,15));
+	objects.insert(new Player(30,15));
+	rooms.insert(new Room(10,5,30,15));
 
 	while(!quit)
 	{
-		
-		console.draw();
-		WriteConsoleOutputCharacterA(Draw::wHnd,(char*)screen,W*H,coord(0,0),NULL);
-		SetConsoleCursorPosition(Draw::wHnd,coord(0,HMO));
 		for(int i=0;i<W;i++)
 			for(int j=0;j<H;j++)
 				screen[j][i]=' ';
-		for(int i=20;i<60;i++)
-			for(int j=5;j<20;j++)
-			{
-				if(i==20 || i==59 || j==5 || j==19)
-					screen[j][i]='#';
-				else
-					screen[j][i]='.';
-			}
+		for(auto it:rooms)
+			it->update();
+		for(auto it:objects)
+			it->draw();
+		console.draw();
+		WriteConsoleOutputCharacterA(Draw::wHnd,(char*)screen,W*H,coord(0,0),NULL);
+		SetConsoleCursorPosition(Draw::wHnd,coord(0,HMO));
+
 		int c=_getch();
 		if(c==0 || c==0xE0)
 		{
@@ -61,6 +60,18 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		for(auto it:objects)
 		{
+			if(it->currentRoom==NULL || !(it->x>=it->currentRoom->x && it->x<it->currentRoom->x+it->currentRoom->w && it->y>=it->currentRoom->y && it->y<it->currentRoom->y+it->currentRoom->h))
+			{
+				for(auto it2:rooms)
+					if(it->x>=it2->x && it->x<it2->x+it2->w && it->y>=it2->y && it->y<it2->y+it2->h)
+					{
+						it->currentRoom=it2;
+						break;
+					}
+			}
+			if(it->currentRoom==NULL)
+				objects.erase(it);
+			else
 			if(it->update(c))
 				c=0;
 		}

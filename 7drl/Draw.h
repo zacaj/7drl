@@ -7,7 +7,7 @@ namespace Draw
 	extern HANDLE rHnd;
 	void setCursor(int x,int y);
 	void p(int x,int y,char c);
-	extern int cx,cy;
+	extern int cx,cy,ncx,ncy;
 }
 
 #define CW W
@@ -22,3 +22,5 @@ namespace Draw
 #define WSW W-AW
 
 extern char screen[H][W];
+
+bool canMoveTo(int &x,int &y,int ox,int oy);

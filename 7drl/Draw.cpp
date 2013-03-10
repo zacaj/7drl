@@ -3,10 +3,11 @@
 #include <windows.h>
 namespace Draw
 {
-	 int cx=0,cy=0;
+	 int cx=0,cy=0,ncx=0,ncy=0;
 HANDLE wHnd;    // Handle to write to the console.
 HANDLE rHnd;
 }
+
 COORD coord(int x,int y);
 void Draw::init()
 {
