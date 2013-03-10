@@ -13,7 +13,6 @@ using namespace std;
 #include "Player.h"
 #include "Room.h"
 set<Object*> objects;
-set<Room*> rooms;
 Console console;
 COORD coord(int x,int y)
 {
@@ -32,7 +31,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	console.console.push_back("4sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg4");
 	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");
 	objects.insert(new Player(30,15));
-	rooms.insert(new Room(10,5,30,15));
+	Room *room;
+	rooms.insert(room=new Room(10,5,30,15));
+	rooms.insert(new Room(39,14,10,3));
+	room->connectTo(*--rooms.end(),39,15);
+	room=*--rooms.end();
+	rooms.insert(new Room(48,10,20,10));
+	room->connectTo(*--rooms.end(),48,15);
+	room=*--rooms.end();
+	room->neighbors.push_back(NULL);
+	room->dx.push_back(room->x2);
+	room->dy.push_back(15);
 
 	while(!quit)
 	{

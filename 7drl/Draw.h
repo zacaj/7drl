@@ -6,7 +6,7 @@ namespace Draw
 	extern HANDLE wHnd;    // Handle to write to the console.
 	extern HANDLE rHnd;
 	void setCursor(int x,int y);
-	void p(int x,int y,char c);
+	bool p(int x,int y,char c);
 	extern int cx,cy,ncx,ncy;
 }
 
@@ -22,5 +22,5 @@ namespace Draw
 #define WSW W-AW
 
 extern char screen[H][W];
-
-bool canMoveTo(int &x,int &y,int ox,int oy);
+class Room;
+void genRoom(Room* o,int n);
