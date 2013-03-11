@@ -19,7 +19,7 @@ COORD coord(int x,int y)
 	COORD bufferSize = {x, y};
 	return bufferSize;
 }
-
+Player *player;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	
@@ -30,9 +30,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	console.console.push_back("3sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg3");
 	console.console.push_back("4sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg4");
 	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");
-	objects.insert(new Player(30,15));
+	objects.insert(player=new Player(30,15));
 	Room *room;
 	rooms.insert(room=new Room(10,5,30,15));
+	player->currentRoom=room;
 	rooms.insert(new Room(39,14,10,3));
 	room->connectTo(*--rooms.end(),39,15);
 	room=*--rooms.end();
@@ -48,11 +49,38 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int i=0;i<W;i++)
 			for(int j=0;j<H;j++)
 				screen[j][i]=' ';
-		for(auto it:rooms)
-			it->update();
+		for(auto it=rooms.begin();it!=rooms.end();)
+		{ 
+			Room *room=*it;
+			room->updatedThisFrame=0;
+			room->drawnThisFrame=0;
+			if(room->shouldRemove)
+			{
+				auto it2=it;
+				++it;
+				rooms.erase(it2);
+				delete room;
+			}
+			else
+			{
+				++it;
+			}
+		}
+		player->currentRoom->update();
+		player->currentRoom->update();
+		player->currentRoom->update();
+
+		for(auto it=rooms.begin();it!=rooms.end();it++)
+			(*it)->draw();
+		//player->currentRoom->draw();
 		for(auto it:objects)
 			it->draw();
+
 		console.draw();
+		char str[100];
+		sprintf_s(str,"Rooms: %i",rooms.size());
+		Draw::str(str,Draw::cx,Draw::cy+1);
+
 		WriteConsoleOutputCharacterA(Draw::wHnd,(char*)screen,W*H,coord(0,0),NULL);
 		SetConsoleCursorPosition(Draw::wHnd,coord(0,HMO));
 
@@ -65,6 +93,18 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 		case 27:
 			quit=1;
+			break;
+		case 'w':
+			Draw::cy--;
+			break;
+		case 's':
+			Draw::cy++;
+			break;
+		case 'a':
+			Draw::cx--;
+			break;
+		case 'd':
+			Draw::cx++;
 			break;
 		}
 		for(auto it:objects)

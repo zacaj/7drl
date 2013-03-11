@@ -8,6 +8,7 @@ namespace Draw
 	void setCursor(int x,int y);
 	bool p(int x,int y,char c);
 	extern int cx,cy,ncx,ncy;
+	void str(char *str,int i,int y);
 }
 
 #define CW W

@@ -56,25 +56,25 @@ start:
 	{
 		if(dx==o->x)//room to left
 		{
-			room=new Room(dx-w,dy-rand()%(h-2),w,h);
+			room=new Room(dx-w+1,dy-rand()%(h-2)-1,w,h);
 			if(!room->isValid())
 				goto start;
 		}
 		else if(dx==o->x2)//room to right
 		{
-			room=new Room(dx,dy-rand()%(h-2),w,h);
+			room=new Room(dx,dy-rand()%(h-2)-1,w,h);
 			if(!room->isValid())
 				goto start;
 		}
 		else if(dy==o->y)//room above
 		{
-			room=new Room(dx-rand()%(w-2),dy-h,w,h);
+			room=new Room(dx-rand()%(w-2)-1,dy-h+1,w,h);
 			if(!room->isValid())
 				goto start;
 		}
 		else //room below
 		{
-			room=new Room(dx-rand()%(w-2),dy,w,h);
+			room=new Room(dx-rand()%(w-2)-1,dy,w,h);
 			if(!room->isValid())
 				goto start;
 		}
@@ -87,112 +87,7 @@ start:
 	room->dy.push_back(dy);
 
 	//add more doors
-	if(room->isHall())
-	{
-		int x,y;
-		if(room->w==3)//vertical
-		{
-			if(room->dy[0]==room->y)//down
-			{
-				switch (rand()%3)
-				{
-				case 0:
-					x=room->x+1;
-					y=room->y2;
-					break;
-				case 1:
-					x=room->x;
-					y=room->y2-1;
-					break;
-				case 2:
-					x=room->x2;
-					y=room->y2-1;
-					break;
-				}
-			}
-			else//up
-			{
-				switch (rand()%3)
-				{
-				case 0:
-					x=room->x+1;
-					y=room->y;
-					break;
-				case 1:
-					x=room->x;
-					y=room->y+1;
-					break;
-				case 2:
-					x=room->x2;
-					y=room->y+1;
-					break;
-				}
-			}
-		}
-		else//horizontal
-		{
-			if(room->dx[0]==room->x)//left
-			{
-				switch (rand()%3)
-				{
-				case 0:
-					x=room->x;
-					y=room->y+1;
-					break;
-				case 1:
-					x=room->x+1;
-					y=room->y;
-					break;
-				case 2:
-					x=room->x+1;
-					y=room->y2;
-					break;
-				}
-			}
-			else//up
-			{
-				switch (rand()%3)
-				{
-				case 0:
-					x=room->x2;
-					y=room->y+1;
-					break;
-				case 1:
-					x=room->x2-1;
-					y=room->y;
-					break;
-				case 2:
-					x=room->x2-1;
-					y=room->y2;
-					break;
-				}
-			}
-		}
-		room->neighbors.push_back(NULL);
-		room->dx.push_back(x);
-		room->dy.push_back(y);
-	}
-	else
-	{
-		int nDoor=rand()%4+1;
-		for(int i=0;i<nDoor;i++)
-		{
-			int x,y;
-			if(rand()%2==0)//vertical wall door
-			{
-				y=rand()%(room->h-2)+room->y+1;
-				x=rand()%2==0?room->x:room->x2;
-			}
-			else
-			{
-				x=rand()%(room->w-2)+room->x+1;
-				y=rand()%2==0?room->h:room->y2;
-			}
-			room->neighbors.push_back(NULL);
-			room->dx.push_back(x);
-			room->dy.push_back(y);
-		}
-	}
+	room->addDoors();
 }
 
 COORD coord(int x,int y);
@@ -232,6 +127,12 @@ bool Draw::p( int x,int y,char c )
 		return 1;
 	}
 	return 0;
+}
+
+void Draw::str( char *str,int i,int y )
+{
+	for(char *c=str;*c!='\0';c++,i++)
+		Draw::p(i,y,*c);
 }
 
 char screen[H][W];

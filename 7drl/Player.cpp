@@ -43,40 +43,41 @@ bool Player::update( int key )
 		ret=1;
 		break;
 	}
-	if(newx==currentRoom->x || newx==currentRoom->x+currentRoom->w-1 || newy==currentRoom->y || newy==currentRoom->y+currentRoom->h-1)
-	{
-		int i;
-		for(i=0;i<currentRoom->dx.size();i++)
+	if(newx!=x || newy!=y)
+		if(newx==currentRoom->x || newx==currentRoom->x+currentRoom->w-1 || newy==currentRoom->y || newy==currentRoom->y+currentRoom->h-1)
 		{
-			if(currentRoom->dx[i]==newx && currentRoom->dy[i]==newy)
-				break;
-		}
-		if(i==currentRoom->dx.size())
-		{
+			int i;
+			for(i=0;i<currentRoom->dx.size();i++)
+			{
+				if(currentRoom->dx[i]==newx && currentRoom->dy[i]==newy && currentRoom->neighbors[i]!=NULL)
+					break;
+			}
+			if(i==currentRoom->dx.size())
+			{
+
+			}
+			else
+			{
+				currentRoom=currentRoom->neighbors[i];
+				goto move;
+			}
 
 		}
 		else
 		{
+			move:
+	#define CAMERA_MARGIN 20
+			if(x-Draw::cx<CAMERA_MARGIN)
+				Draw::cx-=CAMERA_MARGIN-(x-Draw::cx);
+			if(y-Draw::cy<CAMERA_MARGIN)
+				Draw::cy-=CAMERA_MARGIN-(y-Draw::cy);
+			if(Draw::cx+WSW-x<CAMERA_MARGIN)
+				Draw::cx+=CAMERA_MARGIN-(Draw::cx+WSW-x);
+			if(Draw::cy+WSH-y<CAMERA_MARGIN)
+				Draw::cy+=CAMERA_MARGIN-(Draw::cy+WSH-y);
 			x=newx;
 			y=newy;
-			currentRoom=currentRoom->neighbors[i];
 		}
-
-	}
-	else
-	{
-		x=newx;
-		y=newy;
-	}
-
-	if(x-Draw::cx<10)
-		Draw::cx-=10-(x-Draw::cx);
-	if(y-Draw::cy<10)
-		Draw::cy-=10-(y-Draw::cy);
-	if(Draw::cx+WSW-x<10)
-		Draw::cx+=10-(Draw::cx+WSW-x);
-	if(Draw::cy+WSH-y<10)
-		Draw::cy+=10-(Draw::cy+WSH-y);
 	return ret;
 }
 
@@ -85,6 +86,9 @@ void Player::draw()
 
 	Draw::p(x,y,c);
 
+	char str[10];
+	sprintf_s(str,"%i,%i",x,y);
+	Draw::str(str,0+Draw::cx,Draw::cy);
 
 	for(int i=0;i<AH;i++)
 		screen[i][WSW]='|';
