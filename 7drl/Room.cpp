@@ -26,33 +26,36 @@ Room::~Room(void)
 
 bool Room::update(int level)
 {
-	if(level>5)
-		return 0;
-	updatedThisFrame=1;
-	for(int i=0;i<neighbors.size();)
+	if(level<5)
 	{
-		if(neighbors[i]==NULL && !drawnThisFrame)
-			genRoom(this,i);
-		if(neighbors[i]==NULL)
+		updatedThisFrame=1;
+		for(int i=0;i<neighbors.size();)
 		{
-			neighbors.erase(neighbors.begin()+i);
-			dx.erase(dx.begin()+i);
-			dy.erase(dy.begin()+i);
+			if(neighbors[i]==NULL && !drawnThisFrame)
+				genRoom(this,i);
+			if(neighbors[i]==NULL)
+			{
+				neighbors.erase(neighbors.begin()+i);
+				dx.erase(dx.begin()+i);
+				dy.erase(dy.begin()+i);
+			}
+			else
+			{
+				i++;
+			}
+
 		}
-		else
+		changed();
+		for(int i=0;i<neighbors.size();i++)
 		{
-			i++;
+			if(neighbors[i]!=NULL)
+				if(!neighbors[i]->updatedThisFrame)
+					neighbors[i]->update(level+1);
 		}
-
 	}
-
-	changed();
-	for(int i=0;i<neighbors.size();i++)
-	{
-		if(neighbors[i]!=NULL)
-		if(!neighbors[i]->updatedThisFrame)
-			neighbors[i]->update(level+1);
-	}
+	//if(level<25)
+	//	changed();
+	return 0;
 }
 
 void Room::draw(int level)
@@ -74,7 +77,7 @@ void Room::draw(int level)
 			Draw::p(dx[i],dy[i],'\\');
 	char str[10];
 	sprintf_s(str,"%i",id);
-	Draw::str(str,x+2,y+2);
+	//Draw::str(str,x+2,y+2);
 	for(int i=0;i<neighbors.size();i++)
 	{
 		//if(neighbors[i]!=NULL)
@@ -241,7 +244,7 @@ void Room::changed()
 			//if(isVisible())
 			//	return;
 			Room *closest=NULL;
-			int closestDist=25;
+			int closestDist=15;
 			int vx=0,vy=0,tx,ty;
 			if(dx[0]==x)
 			{
@@ -268,13 +271,13 @@ void Room::changed()
 				ty=y;
 			}
 
-			while(abs(tx-x)+abs(ty-y)<25)
+			while(abs(tx-x)+abs(ty-y)<15)
 			{
 				tx+=vx;
 				ty+=vy;
 				for(auto it:rooms)
 				{
-					if(it==this) continue;
+					if(it==this || it->shouldRemove==1) continue;
 					if(tx>it->x && tx<it->x2 && ty>it->y && ty<it->y2 && abs(tx-x)+abs(ty-y)<closestDist)
 					{
 						closest=it;
@@ -288,25 +291,33 @@ void Room::changed()
 				for(int i=0;i<neighbors.size() && !dup;i++)
 				{
 					Room *n=neighbors[i];
-					for(int j=0;j<closest->neighbors.size() && !dup;j++)
-					{
-						for(int k=0;k<closest->neighbors[j]->neighbors.size() && !dup;k++)
+					if(n!=NULL)
+						for(int j=0;j<closest->neighbors.size() && !dup;j++)
 						{
-							if(closest->neighbors[j]->neighbors[k]==n)
-								dup=1;
+							if(closest->neighbors[j]!=NULL)
+								for(int k=0;k<closest->neighbors[j]->neighbors.size() && !dup;k++)
+								{
+									if(closest->neighbors[j]->neighbors[k]==n)
+										dup=1;
+								}
 						}
-					}
 				}
 			if(closest==NULL || dup)
 			{
 				int j;
-				for(j=0;j<neighbors[0]->neighbors.size();j++)
-					if(neighbors[0]->neighbors[j]==this)
-						break;
-				neighbors[0]->neighbors.erase(neighbors[0]->neighbors.begin()+j);
-				neighbors[0]->dx.erase(neighbors[0]->dx.begin()+j);
-				neighbors[0]->dy.erase(neighbors[0]->dy.begin()+j);
-				neighbors[0]->changed();
+				for(int i=0;i<neighbors.size();i++)
+				{
+					for(j=0;j<neighbors[i]->neighbors.size();j++)
+						if(neighbors[i]->neighbors[j]==this)
+						{
+							if(neighbors[i]->neighbors[j]->id==4439)
+								printf((""));
+							neighbors[i]->neighbors.erase(neighbors[i]->neighbors.begin()+j);
+							neighbors[i]->dx.erase(neighbors[i]->dx.begin()+j);
+							neighbors[i]->dy.erase(neighbors[i]->dy.begin()+j);
+							neighbors[i]->changed();
+						}
+				}
 				shouldRemove=1;
 				return;
 			}

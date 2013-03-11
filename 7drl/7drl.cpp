@@ -66,9 +66,8 @@ int _tmain(int argc, _TCHAR* argv[])
 				++it;
 			}
 		}
-		player->currentRoom->update();
-		player->currentRoom->update();
-		player->currentRoom->update();
+		for(int i=0;i<1;i++)
+			player->currentRoom->update();
 
 		for(auto it=rooms.begin();it!=rooms.end();it++)
 			(*it)->draw();
@@ -81,7 +80,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		sprintf_s(str,"Rooms: %i",rooms.size());
 		Draw::str(str,Draw::cx,Draw::cy+1);
 
-		WriteConsoleOutputCharacterA(Draw::wHnd,(char*)screen,W*H,coord(0,0),NULL);
+		LPDWORD t=new DWORD;
+		WriteConsoleOutputCharacterA(Draw::wHnd,(char*)screen,W*H,coord(0,0),t);
+		delete t;
 		SetConsoleCursorPosition(Draw::wHnd,coord(0,HMO));
 
 		int c=_getch();

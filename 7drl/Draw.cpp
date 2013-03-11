@@ -23,8 +23,8 @@ start:
 	if(room!=NULL)
 		delete room;
 	int makeRoom=rand()%3+rand()%2*o->isHall();
-	int w=rand()%20+10;
-	int h=rand()%20+10;
+	int w=rand()%10+7;
+	int h=rand()%10+7;
 	if(!o->isHall() || makeRoom==0)//make hall
 	{
 		if(dx==o->x2)//horizontal hall to right
