@@ -58,8 +58,18 @@ bool Player::update( int key )
 			}
 			else
 			{
-				currentRoom=currentRoom->neighbors[i].room;
-				goto move;
+				if(currentRoom->neighbors[i].isOpen())
+				{
+					currentRoom=currentRoom->neighbors[i].room;
+					goto move;
+				}
+				else if(currentRoom->neighbors[i].isOpenable())
+				{
+					currentRoom->neighbors[i].t=OPEN;
+					for(int j=0;j<currentRoom->neighbors[i].room->neighbors.size();j++)
+						if(currentRoom->neighbors[i].room->neighbors[j].room==currentRoom)
+							currentRoom->neighbors[i].room->neighbors[j].t=OPEN;
+				}
 			}
 
 		}

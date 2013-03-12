@@ -2,7 +2,7 @@
 #include "Room.h"
 #include "Draw.h"
 #include <set>
-
+bool drawAll=0;
 
 vector<Room*> rooms;
 Room::Room(int _x,int _y,int _w,int _h)
@@ -83,6 +83,12 @@ void Room::draw(int level)
 			case 1:
 				c='.';
 				break;
+			case CLOSED_H:
+				c='-';
+				break;
+			case CLOSED_V:
+				c='|';
+				break;
 			default:
 				c='?';
 				break;
@@ -94,9 +100,9 @@ void Room::draw(int level)
 	//Draw::str(str,x+2,y+2);
 	for(int i=0;i<neighbors.size();i++)
 	{
-		//if(neighbors[i]!=NULL)
-		//if(!neighbors[i]->drawnThisFrame)
-		//	neighbors[i]->draw(level+1);
+		if(neighbors[i].room!=NULL)
+		if(!neighbors[i].room->drawnThisFrame && (neighbors[i].isOpen() || drawAll))
+			neighbors[i].room->draw(level+1);
 	}
 }
 
@@ -104,6 +110,12 @@ void Room::connectTo( Room *room,int x,int y,int t )
 {
 	if(room->shouldRemove || shouldRemove)
 		return;
+	for(int i=0;i<neighbors.size();i++)
+		if(neighbors[i].x==x && neighbors[i].y==y)
+			return;
+	for(int i=0;i<room->neighbors.size();i++)
+		if(room->neighbors[i].x==x && room->neighbors[i].y==y)
+			return;
 	room->neighbors.push_back(Door(this,x,y,t));
 	neighbors.push_back(Door(room,x,y,t));
 	switch(t)

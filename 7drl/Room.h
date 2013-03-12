@@ -6,20 +6,9 @@ class Room;
 #define OPEN 0
 #define CLOSED_H 2
 #define CLOSED_V 3
+#define CLOSED 4
 #define INVISIBLE 1
-struct Door
-{
-	Room *room;
-	int x,y;
-	int t;
-	Door(Room *_room,int _x,int _y,int _t)
-	{
-		room=_room;
-		x=_x;
-		y=_y;
-		t=_t;
-	}
-};
+struct Door;
 class Room
 {
 public:
@@ -41,6 +30,39 @@ public:
 	void addDoors();
 	void changed();
 	bool isVisible();
+};
+extern bool drawAll;
+struct Door
+{
+	Room *room;
+	int x,y;
+	int t;
+	Door(Room *_room,int _x,int _y,int _t)
+	{
+		room=_room;
+		x=_x;
+		y=_y;
+		t=_t;
+		if(t==CLOSED)
+		{
+			close();
+		}
+	}
+	bool isOpen()
+	{
+		return t==OPEN || t==INVISIBLE;
+	}
+	bool isOpenable()
+	{
+		return t==CLOSED_V || t==CLOSED_H;
+	}
+	void close()
+	{
+		if(x==room->x || x==room->x2)
+			t=CLOSED_V;
+		else
+			t=CLOSED_H;
+	}
 };
 static int rid=0;
 

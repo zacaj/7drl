@@ -128,7 +128,8 @@ start:
 	//room valid
 	rooms.push_back(room);
 	o->neighbors[n].room=room;
-	room->neighbors.push_back(Door(o,dx,dy,0));
+	o->neighbors[n].close();
+	room->neighbors.push_back(Door(o,dx,dy,CLOSED));
 
 	//add more doors
 	room->addDoors();

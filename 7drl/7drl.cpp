@@ -69,9 +69,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		for(int i=0;i<10;i++)
 			player->currentRoom->update();
 
-		for(auto it=rooms.begin();it!=rooms.end();it++)
-			(*it)->draw();
-		//player->currentRoom->draw();
+		//for(auto it=rooms.begin();it!=rooms.end();it++)
+		//	(*it)->draw();
+		player->currentRoom->draw();
 		for(auto it:objects)
 			it->draw();
 
@@ -106,6 +106,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			break;
 		case 'd':
 			Draw::cx++;
+			break;
+		case 'p':
+			drawAll=!drawAll;
 			break;
 		}
 		for(auto it:objects)
