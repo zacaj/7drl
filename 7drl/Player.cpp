@@ -47,18 +47,18 @@ bool Player::update( int key )
 		if(newx==currentRoom->x || newx==currentRoom->x+currentRoom->w-1 || newy==currentRoom->y || newy==currentRoom->y+currentRoom->h-1)
 		{
 			int i;
-			for(i=0;i<currentRoom->dx.size();i++)
+			for(i=0;i<currentRoom->neighbors.size();i++)
 			{
-				if(currentRoom->dx[i]==newx && currentRoom->dy[i]==newy && currentRoom->neighbors[i]!=NULL)
+				if(currentRoom->neighbors[i].x==newx && currentRoom->neighbors[i].y==newy && currentRoom->neighbors[i].room!=NULL)
 					break;
 			}
-			if(i==currentRoom->dx.size())
+			if(i==currentRoom->neighbors.size())
 			{
 
 			}
 			else
 			{
-				currentRoom=currentRoom->neighbors[i];
+				currentRoom=currentRoom->neighbors[i].room;
 				goto move;
 			}
 

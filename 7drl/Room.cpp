@@ -4,7 +4,7 @@
 #include <set>
 
 
-set<Room*> rooms;
+vector<Room*> rooms;
 Room::Room(int _x,int _y,int _w,int _h)
 {
 	x=_x;
@@ -16,6 +16,7 @@ Room::Room(int _x,int _y,int _w,int _h)
 	id=rid++;
 	drawnThisFrame=updatedThisFrame=0;
 	shouldRemove=0;
+	doorAdjustment=0;
 	addedDoors=0;
 }
 
@@ -26,18 +27,16 @@ Room::~Room(void)
 
 bool Room::update(int level)
 {
-	if(level<5)
+	if(level<15)
 	{
 		updatedThisFrame=1;
 		for(int i=0;i<neighbors.size();)
 		{
-			if(neighbors[i]==NULL && !drawnThisFrame)
+			if(neighbors[i].room==NULL && !drawnThisFrame)
 				genRoom(this,i);
-			if(neighbors[i]==NULL)
+			if(neighbors[i].room==NULL || neighbors[i].room->shouldRemove)
 			{
 				neighbors.erase(neighbors.begin()+i);
-				dx.erase(dx.begin()+i);
-				dy.erase(dy.begin()+i);
 			}
 			else
 			{
@@ -48,9 +47,9 @@ bool Room::update(int level)
 		changed();
 		for(int i=0;i<neighbors.size();i++)
 		{
-			if(neighbors[i]!=NULL)
-				if(!neighbors[i]->updatedThisFrame)
-					neighbors[i]->update(level+1);
+			if(neighbors[i].room!=NULL)
+				if(!neighbors[i].room->updatedThisFrame)
+					neighbors[i].room->update(level+1);
 		}
 	}
 	//if(level<25)
@@ -72,9 +71,24 @@ void Room::draw(int level)
 				Draw::p(i,j,'.');
 		}
 
-	for(int i=0;i<dx.size();i++)
-		if(neighbors[i]!=NULL)
-			Draw::p(dx[i],dy[i],'\\');
+	for(int i=0;i<neighbors.size();i++)
+		if(neighbors[i].room!=NULL)
+		{
+			char c='?';
+			switch(neighbors[i].t)
+			{
+			case 0:
+				c='\\';
+				break;
+			case 1:
+				c='.';
+				break;
+			default:
+				c='?';
+				break;
+			}
+			Draw::p(neighbors[i].x,neighbors[i].y,c);
+		}
 	char str[10];
 	sprintf_s(str,"%i",id);
 	//Draw::str(str,x+2,y+2);
@@ -86,14 +100,21 @@ void Room::draw(int level)
 	}
 }
 
-void Room::connectTo( Room *room,int x,int y )
+void Room::connectTo( Room *room,int x,int y,int t )
 {
-	room->neighbors.push_back(this);
-	neighbors.push_back(room);
-	room->dx.push_back(x);
-	dx.push_back(x);
-	room->dy.push_back(y);
-	dy.push_back(y);
+	if(room->shouldRemove || shouldRemove)
+		return;
+	room->neighbors.push_back(Door(this,x,y,t));
+	neighbors.push_back(Door(room,x,y,t));
+	switch(t)
+	{
+	case 0:
+		break;
+	case 1:
+		doorAdjustment++;
+		room->doorAdjustment++;
+		break;
+	}
 }
 
 bool Room::isHall()
@@ -106,14 +127,17 @@ bool Room::isValid()
 	
 	if(isVisible())
 		return 0;
-	for(auto it:rooms)
+	size_t s=rooms.size();
+	Room **it=rooms.data();
+	for(size_t i=0;i<s;i++,it++)
 	{
-		if(it==this)
+		Room *r=*it;
+		if(r==this)
 			continue;
-		if(x >= it->x2) continue;
-		if(y >= it->y2) continue;
-		if(x2 <= it->x) continue;
-		if(y2 <= it->y) continue;
+		if(x >= r->x2) continue;
+		if(y >= r->y2) continue;
+		if(x2 <= r->x) continue;
+		if(y2 <= r->y) continue;
 
 		return 0;
 	}
@@ -132,7 +156,7 @@ void Room::addDoors()
 		int x_,y_;
 		if(w==3)//vertical
 		{
-			if(dy[0]==y)//down
+			if(neighbors[0].y==y)//down
 			{
 				switch (rand()%3)
 				{
@@ -171,7 +195,7 @@ void Room::addDoors()
 		}
 		else//horizontal
 		{
-			if(dx[0]==x2)//left
+			if(neighbors[0].x==x2)//left
 			{
 				switch (rand()%3)
 				{
@@ -208,17 +232,15 @@ void Room::addDoors()
 				}
 			}
 		}
-		neighbors.push_back(NULL);
-		dx.push_back(x_);
-		dy.push_back(y_);
+		neighbors.push_back(Door(NULL,x_,y_,0));
 	}
 	else
 	{
-		int nDoor=min(rand()%6+1,6-neighbors.size());
+		int nDoor=min(rand()%16+1+doorAdjustment,16-(neighbors.size()-doorAdjustment));
 		for(int i=0;i<nDoor;i++)
 		{
 			int x_,y_;
-			if(rand()%2==0)//vertical wall door
+			if(rand()%3!=0)//vertical wall door
 			{
 				y_=rand()%(h-2)+y+1;
 				x_=rand()%2==0?x:x2;
@@ -228,16 +250,14 @@ void Room::addDoors()
 				x_=rand()%(w-2)+x+1;
 				y_=rand()%2==0?y:y2;
 			}
-			neighbors.push_back(NULL);
-			dx.push_back(x_);
-			dy.push_back(y_);
+			neighbors.push_back(Door(NULL,x_,y_,0));
 		}
 	}
 }
 
 void Room::changed()
 {
-	if(neighbors.size()==1)
+	if(neighbors.size()-doorAdjustment==1)
 	{
 		if(isHall())
 		{
@@ -246,19 +266,19 @@ void Room::changed()
 			Room *closest=NULL;
 			int closestDist=15;
 			int vx=0,vy=0,tx,ty;
-			if(dx[0]==x)
+			if(neighbors[0].x==x)
 			{
 				vx=1;
 				tx=x2;
 				ty=y+1;
 			}
-			else if(dx[0]==x2)
+			else if(neighbors[0].x==x2)
 			{
 				vx=-1;
 				tx=x;
 				ty=y+1;
 			}
-			else if(dy[0]==y)
+			else if(neighbors[0].y==y)
 			{
 				vy=1;
 				tx=x+1;
@@ -275,8 +295,11 @@ void Room::changed()
 			{
 				tx+=vx;
 				ty+=vy;
-				for(auto it:rooms)
+				size_t s=rooms.size();
+				Room **rs=rooms.data();
+				for(size_t i=0;i<s;i++,rs++)
 				{
+					Room *it=*rs;
 					if(it==this || it->shouldRemove==1) continue;
 					if(tx>it->x && tx<it->x2 && ty>it->y && ty<it->y2 && abs(tx-x)+abs(ty-y)<closestDist)
 					{
@@ -290,14 +313,14 @@ void Room::changed()
 			if(closest!=NULL)
 				for(int i=0;i<neighbors.size() && !dup;i++)
 				{
-					Room *n=neighbors[i];
+					Room *n=neighbors[i].room;
 					if(n!=NULL)
 						for(int j=0;j<closest->neighbors.size() && !dup;j++)
 						{
-							if(closest->neighbors[j]!=NULL)
-								for(int k=0;k<closest->neighbors[j]->neighbors.size() && !dup;k++)
+							if(closest->neighbors[j].room!=NULL)
+								for(int k=0;k<closest->neighbors[j].room->neighbors.size() && !dup;k++)
 								{
-									if(closest->neighbors[j]->neighbors[k]==n)
+									if(closest->neighbors[j].room->neighbors[k].room==n)
 										dup=1;
 								}
 						}
@@ -307,16 +330,17 @@ void Room::changed()
 				int j;
 				for(int i=0;i<neighbors.size();i++)
 				{
-					for(j=0;j<neighbors[i]->neighbors.size();j++)
-						if(neighbors[i]->neighbors[j]==this)
-						{
-							if(neighbors[i]->neighbors[j]->id==4439)
-								printf((""));
-							neighbors[i]->neighbors.erase(neighbors[i]->neighbors.begin()+j);
-							neighbors[i]->dx.erase(neighbors[i]->dx.begin()+j);
-							neighbors[i]->dy.erase(neighbors[i]->dy.begin()+j);
-							neighbors[i]->changed();
-						}
+ 					if(i>=neighbors.size())
+						break;
+					if(neighbors[i].room!=NULL)
+						for(j=0;i<neighbors.size() && j<neighbors[i].room->neighbors.size();j++)
+							if(neighbors[i].room->neighbors[j].room==this)
+							{
+								if(neighbors[i].room->neighbors[j].t==1)
+									neighbors[i].room->doorAdjustment--;
+								neighbors[i].room->neighbors.erase(neighbors[i].room->neighbors.begin()+j);
+								neighbors[i].room->changed();
+							}
 				}
 				shouldRemove=1;
 				return;

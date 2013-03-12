@@ -32,41 +32,41 @@ int _tmain(int argc, _TCHAR* argv[])
 	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");
 	objects.insert(player=new Player(30,15));
 	Room *room;
-	rooms.insert(room=new Room(10,5,30,15));
+	rooms.push_back(room=new Room(10,5,30,15));
 	player->currentRoom=room;
-	rooms.insert(new Room(39,14,10,3));
+	rooms.push_back(new Room(39,14,10,3));
 	room->connectTo(*--rooms.end(),39,15);
 	room=*--rooms.end();
-	rooms.insert(new Room(48,10,20,10));
+	rooms.push_back(new Room(48,10,20,10));
 	room->connectTo(*--rooms.end(),48,15);
 	room=*--rooms.end();
-	room->neighbors.push_back(NULL);
-	room->dx.push_back(room->x2);
-	room->dy.push_back(15);
+	room->neighbors.push_back(Door(NULL,room->x2,15,0));
 
 	while(!quit)
 	{
 		for(int i=0;i<W;i++)
 			for(int j=0;j<H;j++)
 				screen[j][i]=' ';
-		for(auto it=rooms.begin();it!=rooms.end();)
+		size_t s=rooms.size();
+		Room **it=rooms.data();
+		for(size_t i=0;i<s;)
 		{ 
 			Room *room=*it;
 			room->updatedThisFrame=0;
 			room->drawnThisFrame=0;
 			if(room->shouldRemove)
 			{
-				auto it2=it;
-				++it;
-				rooms.erase(it2);
+				rooms.erase(rooms.begin()+i);
+				s--;
 				delete room;
 			}
 			else
 			{
+				i++;
 				++it;
 			}
 		}
-		for(int i=0;i<1;i++)
+		for(int i=0;i<10;i++)
 			player->currentRoom->update();
 
 		for(auto it=rooms.begin();it!=rooms.end();it++)

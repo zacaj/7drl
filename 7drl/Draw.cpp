@@ -11,9 +11,11 @@ HANDLE rHnd;
 
 void genRoom( Room* o,int n )
 {
+	if(o->shouldRemove)
+		return;
 	Room *room=NULL;
-	int dx=o->dx[n];
-	int dy=o->dy[n];
+	int dx=o->neighbors[n].x;
+	int dy=o->neighbors[n].y;
 	int tries=0;
 start:
 	if(tries++>50)
@@ -24,9 +26,13 @@ start:
 		delete room;
 	int makeRoom=rand()%3+rand()%2*o->isHall();
 	int w=rand()%10+7;
-	int h=rand()%10+7;
-	if(!o->isHall() || makeRoom==0)//make hall
+	int h=(((float)(rand()%800))/1000+.5)*w;
+	if(!o->isHall() || (makeRoom==0 && !(o->w==3 && (dy==o->y || dy==o->y2)) && !(o->h==3 && (dx==o->x || dx==o->x2))))//make hall
 	{
+		//w-=rand()%2;
+		//h-=rand()%2;
+		w=min(w,7);
+		h=min(h,7);
 		if(dx==o->x2)//horizontal hall to right
 		{
 			room=new Room(dx,dy-1,w,3);
@@ -79,12 +85,50 @@ start:
 				goto start;
 		}
 	}
+	size_t s=rooms.size();
+	Room **rs=rooms.data();
+	for(size_t i=0;i<s;i++,rs++)
+		{
+			Room *it=*rs;
+			if((it->isHall()!=room->isHall()) && rand()%6!=0)
+				continue;
+			{
+				int x=-99999;
+				if(it->x==room->x2)
+					x=it->x;
+				else if(it->x2==room->x)
+					x=it->x2;
+				if(x!=-99999)
+				{
+					int y1=max(it->y,room->y);
+					int y2=min(it->y2,room->y2);
+					for(int y=y1+1;y<y2;y++)
+					{
+						it->connectTo(room,x,y,1);
+					}
+				}
+			}
+			{
+				int y=-99999;
+				if(it->y==room->y2)
+					y=it->y;
+				else if(it->y2==room->y)
+					y=it->y2;
+				if(y!=-99999)
+				{
+					int x1=max(it->x,room->x);
+					int x2=min(it->x2,room->x2);
+					for(int x=x1+1;x<x2;x++)
+					{
+						it->connectTo(room,x,y,1);
+					}
+				}
+			}
+		}
 	//room valid
-	rooms.insert(room);
-	o->neighbors[n]=room;
-	room->neighbors.push_back(o);
-	room->dx.push_back(dx);
-	room->dy.push_back(dy);
+	rooms.push_back(room);
+	o->neighbors[n].room=room;
+	room->neighbors.push_back(Door(o,dx,dy,0));
 
 	//add more doors
 	room->addDoors();
