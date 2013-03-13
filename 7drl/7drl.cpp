@@ -12,7 +12,8 @@ using namespace std;
 #include "Object.h"
 #include "Player.h"
 #include "Room.h"
-set<Object*> objects;
+#include "Chest.h"
+#include "Item.h"
 Console console;
 COORD coord(int x,int y)
 {
@@ -25,12 +26,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	bool quit=0;
 	Draw::init();
-	console.console.push_back("1sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg1");
+	/*console.console.push_back("1sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg1");
 	console.console.push_back("2sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg2");
 	console.console.push_back("3sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg3");
 	console.console.push_back("4sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg4");
-	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");
-	objects.insert(player=new Player(30,15));
+	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");*/
+	objects.push_back(player=new Player(30,15));
 	Room *room;
 	rooms.push_back(room=new Room(10,5,30,15));
 	player->currentRoom=room;
@@ -41,7 +42,24 @@ int _tmain(int argc, _TCHAR* argv[])
 	room->connectTo(*--rooms.end(),48,15);
 	room=*--rooms.end();
 	room->neighbors.push_back(Door(NULL,room->x2,15,0));
+	Chest *chest;
+	objects.push_back(chest=new Chest(29,15));
+	chest->contents.push_back(new Item('p',"red potion"));
+	chest->contents.push_back(new Item('w',"whistle"));
+	chest->contents.push_back(new Item('s',"rusty sword"));
 
+	for(auto it:objects)
+	{
+		if(it->currentRoom==NULL || !(it->x>=it->currentRoom->x && it->x<it->currentRoom->x+it->currentRoom->w && it->y>=it->currentRoom->y && it->y<it->currentRoom->y+it->currentRoom->h))
+		{
+			for(auto it2:rooms)
+				if(it->x>=it2->x && it->x<it2->x+it2->w && it->y>=it2->y && it->y<it2->y+it2->h)
+				{
+					it->currentRoom=it2;
+					break;
+				}
+		}
+	}
 	while(!quit)
 	{
 		for(int i=0;i<W;i++)
@@ -111,8 +129,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			drawAll=!drawAll;
 			break;
 		}
-		for(auto it:objects)
+		for(int i=0;i<objects.size();i++)
 		{
+			Object *it=objects[i];
 			if(it->currentRoom==NULL || !(it->x>=it->currentRoom->x && it->x<it->currentRoom->x+it->currentRoom->w && it->y>=it->currentRoom->y && it->y<it->currentRoom->y+it->currentRoom->h))
 			{
 				for(auto it2:rooms)
@@ -122,11 +141,17 @@ int _tmain(int argc, _TCHAR* argv[])
 						break;
 					}
 			}
-			if(it->currentRoom==NULL)
-				objects.erase(it);
-			else
-			if(it->update(c))
-				c=0;
+			if(it->currentRoom==NULL || it->shouldRemove)
+			{
+				delete it;
+				objects.erase(objects.begin()+i);
+			}
+			else 
+			{
+				if(it->update(c))
+					c=0;
+				it++;
+			}
 		}
 	}
 	return 0;

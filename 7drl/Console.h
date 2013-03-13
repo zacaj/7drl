@@ -1,11 +1,13 @@
 #pragma once
 #include <vector>
+#include "string"
 using namespace std;
 
 class Console
 {
 public:
-	vector<char*> console;
+	vector<string> console;
 	void draw();
 };
 
+extern Console console;

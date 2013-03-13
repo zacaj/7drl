@@ -173,11 +173,24 @@ bool Draw::p( int x,int y,char c )
 	}
 	return 0;
 }
-
+bool Draw::pg( int x,int y,char c )
+{
+	if(x>=0 && y>=0 && x<W && y<H)
+	{
+		screen[y][x]=c;
+		return 1;
+	}
+	return 0;
+}
 void Draw::str( char *str,int i,int y )
 {
 	for(char *c=str;*c!='\0';c++,i++)
 		Draw::p(i,y,*c);
+}
+void Draw::strg( const char *str,int i,int y )
+{
+	for(char *c=(char*)str;*c!='\0';c++,i++)
+		Draw::pg(i,y,*c);
 }
 
 char screen[H][W];

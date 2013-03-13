@@ -59,45 +59,47 @@ bool Room::update(int level)
 
 void Room::draw(int level)
 {
-	if(!isVisible())
-		return;
 	drawnThisFrame=1;
-	for(int i=x;i<x+w;i++)
-		for(int j=y;j<y+h;j++)
-		{
-			if(i==x || i==x+w-1 || j==y || j==y+h-1)
-				Draw::p(i,j,'#');
-			else
-				Draw::p(i,j,'.');
-		}
+	if(isVisible())
+	{
 
-	for(int i=0;i<neighbors.size();i++)
-		if(neighbors[i].room!=NULL)
-		{
-			char c='?';
-			switch(neighbors[i].t)
+		for(int i=x;i<x+w;i++)
+			for(int j=y;j<y+h;j++)
 			{
-			case 0:
-				c='\\';
-				break;
-			case 1:
-				c='.';
-				break;
-			case CLOSED_H:
-				c='-';
-				break;
-			case CLOSED_V:
-				c='|';
-				break;
-			default:
-				c='?';
-				break;
+				if(i==x || i==x+w-1 || j==y || j==y+h-1)
+					Draw::p(i,j,'#');
+				else
+					Draw::p(i,j,'.');
 			}
-			Draw::p(neighbors[i].x,neighbors[i].y,c);
-		}
-	char str[10];
-	sprintf_s(str,"%i",id);
-	//Draw::str(str,x+2,y+2);
+
+			for(int i=0;i<neighbors.size();i++)
+				if(neighbors[i].room!=NULL)
+				{
+					char c='?';
+					switch(neighbors[i].t)
+					{
+					case 0:
+						c='\\';
+						break;
+					case 1:
+						c='.';
+						break;
+					case CLOSED_H:
+						c='-';
+						break;
+					case CLOSED_V:
+						c='|';
+						break;
+					default:
+						c='?';
+						break;
+					}
+					Draw::p(neighbors[i].x,neighbors[i].y,c);
+				}
+				char str[10];
+				sprintf_s(str,"%i",id);
+				//Draw::str(str,x+2,y+2);
+	}
 	for(int i=0;i<neighbors.size();i++)
 	{
 		if(neighbors[i].room!=NULL)

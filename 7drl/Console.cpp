@@ -10,7 +10,7 @@ void Console::draw()
 	int y=HMO;
 	for(int i=console.size()-1;i>=0 && y>H-CH;i--)
 	{
-		int l=strlen(console[i]);
+		int l=console[i].size();
 		int lines=l/CW+1;
 		Draw::setCursor(0,y);
 		for(int j=lines-1;j>=0;j--)
