@@ -13,10 +13,13 @@ Player::Player(int _x,int _y)
 {
 	x=_x;
 	y=_y;
+	hp=100;
 	c='@';
 	inventory.push_back(new Item('n',"note","the note reads: \"Never forget The Terror.\""));
 	mode=MAIN;
 	desc="";
+	equipped=NULL;
+	inventory.push_back(new Weapon(10,5,12));
 }
 
 
@@ -28,6 +31,7 @@ bool Player::update( int key )
 {
 	bool ret=0;
 	int newx=x,newy=y;
+	Item *item;
 	switch(mode)
 	{
 	case MAIN:
@@ -94,7 +98,7 @@ bool Player::update( int key )
 			ret=1;
 			break;
 		case 'd':
-			Item *item=inventory[inv];
+			item=inventory[inv];
 			item->x=x;
 			item->y=y;
 			item->currentRoom=currentRoom;
@@ -110,6 +114,10 @@ bool Player::update( int key )
 			else if(y!=currentRoom->y+1)
 				item->y=y-1;
 			objects.push_back(item);
+			ret=1;
+			break;
+		case '\r':
+			inventory[inv]->use(this);
 			ret=1;
 			break;
 		}
@@ -224,6 +232,15 @@ void Player::draw()
 		STR("p  show rooms");
 		STR("WASD   camera");
 		STR("Esc      quit");
+		sprintf_s(str,"HP: %i",hp);
+		Draw::strg(str,WSW+2,AH-2);
+		if(equipped!=NULL)
+		{
+			sprintf_s(str,"%-3i/%-3i/%-4i",equipped->atk,equipped->pls,equipped->crt);
+			Draw::strg(equipped->name.c_str(),WSW+2,AH-5);
+			Draw::strg("ATK/PLS/CRIT",WSW+2,AH-4);
+			Draw::strg(str,WSW+2,AH-3);
+		}
 		break;
 	case EXAMINE:
 		STR("Press the key");

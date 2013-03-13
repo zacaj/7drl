@@ -1,11 +1,14 @@
 #pragma once
 #include "Object.h"
+#include "Weapon.h"
 enum Mode{MAIN,INVENTORY,EXAMINE};
 class Item;
 class Player :
 	public Object
 {
 public:
+	int hp;
+	Weapon *equipped;
 	vector<Item*> inventory;
 	Mode mode;
 	int inv;

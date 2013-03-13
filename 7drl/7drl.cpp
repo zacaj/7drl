@@ -14,6 +14,7 @@ using namespace std;
 #include "Room.h"
 #include "Chest.h"
 #include "Item.h"
+#include "Goblin.h"
 Console console;
 COORD coord(int x,int y)
 {
@@ -32,6 +33,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	console.console.push_back("4sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg4");
 	console.console.push_back("5sfdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdfgdfgdgdg5");*/
 	objects.push_back(player=new Player(30,15));
+	objects.push_back(new Goblin(30,14));
 	Room *room;
 	rooms.push_back(room=new Room(10,5,30,15));
 	player->currentRoom=room;

@@ -9,7 +9,7 @@ Chest::Chest(int _x,int _y)
 	x=_x;
 	y=_y;
 	c='C';
-	name="A chest.";
+	name="chest";
 	desc="";
 }
 
@@ -49,7 +49,7 @@ bool Chest::collidedWith( Player *player )
 			contents.pop_back();
 		}
 		c='c';
-		name="A chest, already plundered.";
+		name="chest, already plundered";
 	}
 	return 0;
 }

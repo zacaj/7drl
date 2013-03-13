@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
 #include "Object.h"
+class Player;
 using namespace std;
 class Item:public Object
 {
 public:
+	Item(){}
 	Item(char _c,string _name,string _desc="");
 	virtual ~Item(void);
 
@@ -12,6 +14,6 @@ public:
 
 
 	virtual bool collidedWith( Player *player );
-
+	virtual void use(Player *player){};
 };
 
