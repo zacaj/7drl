@@ -31,6 +31,7 @@ Player::~Player(void)
 
 bool Player::update( int key )
 {
+	shouldUpdateWorld=1;
 	bool ret=0;
 	int newx=x,newy=y;
 	Item *item;
@@ -59,7 +60,7 @@ bool Player::update( int key )
 			int i;
 			for(i=0;i<currentRoom->neighbors.size();i++)
 			{
-#define DOOR_TEST(_x,_y)	if(currentRoom->neighbors[i].x==_x && currentRoom->neighbors[i].y==_y && currentRoom->neighbors[i].room!=NULL && currentRoom->neighbors[i].isOpen()) {currentRoom->neighbors[i].close(); ret=1;}
+#define DOOR_TEST(_x,_y)	if(currentRoom->neighbors[i].x==_x && currentRoom->neighbors[i].y==_y && currentRoom->neighbors[i].room!=NULL && currentRoom->neighbors[i].isOpen()) {currentRoom->neighbors[i].close(); for(int j=0;j<currentRoom->neighbors[i].room->neighbors.size();j++){if(currentRoom->neighbors[i].room->neighbors[j].room==currentRoom) currentRoom->neighbors[i].room->neighbors[j].close();}ret=1;}
 				DOOR_TEST(x+1,y)
 					DOOR_TEST(x-1,y)
 					DOOR_TEST(x,y+1)
@@ -69,16 +70,19 @@ bool Player::update( int key )
 			break;
 		case 'x':
 			mode=EXAMINE;
+			shouldUpdateWorld=0;
 			ret=1;
 			break;
 		case 'i':
 			mode=INVENTORY;
+			shouldUpdateWorld=0;
 			inv=0;
 			ret=1;
 			break;
 		}
 		break;
 	case INVENTORY:
+		shouldUpdateWorld=0;
 		switch(key)
 		{
 		case UP:
@@ -93,6 +97,7 @@ bool Player::update( int key )
 			break;
 		case 8:
 			mode=MAIN;
+			shouldUpdateWorld=1;
 			ret=1; 
 			break;
 		case 'x':
@@ -126,6 +131,7 @@ bool Player::update( int key )
 		}
 		break;
 	case EXAMINE:
+		shouldUpdateWorld=0;
 		if(key!=8)
 		{
 			bool found=0;
@@ -142,6 +148,7 @@ bool Player::update( int key )
 				console.console.push_back("You don't see a \'"+(string()+(char)key)+"\'");
 		}
 		mode=MAIN;
+		shouldUpdateWorld=1;
 		break;
 	}
 	

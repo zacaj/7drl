@@ -31,8 +31,9 @@ void Object::draw()
 	}
 }
 
-void Object::moveTo( int newx,int newy,bool canOpenDoors/*=0*/ )
+bool Object::moveTo( int newx,int newy,bool canOpenDoors/*=0*/ )
 {
+	bool active=0;
 	if(newx!=x || newy!=y)
 		if(newx==currentRoom->x || newx==currentRoom->x+currentRoom->w-1 || newy==currentRoom->y || newy==currentRoom->y+currentRoom->h-1)
 		{
@@ -70,17 +71,20 @@ move:
 			bool clear=1;
 			for(int i=0;i<objs.size();i++)
 			{
-				if(!collidedWith(objs[i]))	
-					objs[i]->collidedWith(this);
+				if(!(active|=collidedWith(objs[i])))	
+					active|=objs[i]->collidedWith(this);
 					if(!objs[i]->shouldRemove && !objs[i]->ethereal)
 						clear=0;
 			}
 			if(!clear)
 				goto end;
+			active=1;
 			x=newx;
 			y=newy;
+
 end:;
 		}
+		return active;
 }
 
 vector<Object*> objectAt( int x,int y )

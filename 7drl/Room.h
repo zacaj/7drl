@@ -12,6 +12,7 @@ struct Door;
 class Room
 {
 public:
+	bool calmed;
 	int id;
 	int x,y,w,h,x2,y2;
 	bool shouldRemove;
@@ -62,6 +63,7 @@ struct Door
 			t=CLOSED_V;
 		else
 			t=CLOSED_H;
+
 	}
 };
 static int rid=0;

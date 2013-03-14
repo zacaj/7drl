@@ -2,6 +2,7 @@
 #include "Room.h"
 #include "Draw.h"
 #include <set>
+#include "Player.h"
 bool drawAll=0;
 
 vector<Room*> rooms;
@@ -18,6 +19,7 @@ Room::Room(int _x,int _y,int _w,int _h)
 	shouldRemove=0;
 	doorAdjustment=0;
 	addedDoors=0;
+	calmed=0;
 }
 
 
@@ -100,11 +102,21 @@ void Room::draw(int level)
 				sprintf_s(str,"%i",id);
 				//Draw::str(str,x+2,y+2);
 	}
+	int drawn=0;
 	for(int i=0;i<neighbors.size();i++)
 	{
 		if(neighbors[i].room!=NULL)
 		if(!neighbors[i].room->drawnThisFrame && (neighbors[i].isOpen() || drawAll))
+		{
 			neighbors[i].room->draw(level+1);
+			drawn++;
+		}
+	}
+	if(drawn==0 && level==0 && !calmed)
+	{
+		player->hp+=15;
+		calmed=15;
+		console.console.push_back("The dungeon doesn't seem so overpowering now.  You feel a bit better.");
 	}
 }
 

@@ -131,6 +131,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			drawAll=!drawAll;
 			break;
 		}
+		int t2=console.console.size();
+		if(player->update(c))
+			c=0;
+		if(player->shouldUpdateWorld)
 		for(int i=0;i<objects.size();i++)
 		{
 			Object *it=objects[i];
@@ -150,11 +154,14 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			else 
 			{
-				if(it->update(c))
-					c=0;
+				if(!it->isPlayer())
+					if(it->update(c))
+						c=0;
 				it++;
 			}
 		}
+		if(console.console.size() && /*console.console.size()==t2 && */console.console.back().size())
+			console.console.push_back("");
 	}
 	return 0;
 }

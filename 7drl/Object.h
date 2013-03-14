@@ -21,7 +21,7 @@ public:
 	virtual void draw();
 	virtual bool isEnemy(){return 0;};
 	virtual bool collidedWith(Object *obj){return 0;}
-	void moveTo(int newx,int newy,bool canOpenDoors=0);
+	bool moveTo(int newx,int newy,bool canOpenDoors=0);
 	virtual bool isPlayer(){return 0;};
 
 };

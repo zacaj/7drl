@@ -10,6 +10,7 @@ class Player :
 {
 public:
 	int hp;
+	bool shouldUpdateWorld;
 	Weapon *equipped;
 	vector<Item*> inventory;
 	Mode mode;
