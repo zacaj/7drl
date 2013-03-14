@@ -7,6 +7,7 @@
 #include "Draw.h"
 #include "Room.h"
 #include "Item.h"
+#include "Enemy.h"
 
 
 Player::Player(int _x,int _y)
@@ -20,6 +21,7 @@ Player::Player(int _x,int _y)
 	desc="";
 	equipped=NULL;
 	inventory.push_back(new Weapon(10,5,12));
+	name="You";
 }
 
 
@@ -118,6 +120,7 @@ bool Player::update( int key )
 			break;
 		case '\r':
 			inventory[inv]->use(this);
+			mode=MAIN;
 			ret=1;
 			break;
 		}
@@ -142,59 +145,16 @@ bool Player::update( int key )
 		break;
 	}
 	
-	if(newx!=x || newy!=y)
-		if(newx==currentRoom->x || newx==currentRoom->x+currentRoom->w-1 || newy==currentRoom->y || newy==currentRoom->y+currentRoom->h-1)
-		{
-			int i;
-			for(i=0;i<currentRoom->neighbors.size();i++)
-			{
-				if(currentRoom->neighbors[i].x==newx && currentRoom->neighbors[i].y==newy && currentRoom->neighbors[i].room!=NULL)
-					break;
-			}
-			if(i==currentRoom->neighbors.size())
-			{
-
-			}
-			else
-			{
-				if(currentRoom->neighbors[i].isOpen())
-				{
-					currentRoom=currentRoom->neighbors[i].room;
-					goto move;
-				}
-				else if(currentRoom->neighbors[i].isOpenable())
-				{
-					currentRoom->neighbors[i].t=OPEN;
-					for(int j=0;j<currentRoom->neighbors[i].room->neighbors.size();j++)
-						if(currentRoom->neighbors[i].room->neighbors[j].room==currentRoom)
-							currentRoom->neighbors[i].room->neighbors[j].t=OPEN;
-				}
-			}
-
-		}
-		else
-		{
-move:
-			Object *obj;
-			while((obj=objectAt(newx,newy)))
-			{
-				obj->collidedWith(this);
-				if(!obj->shouldRemove)
-					goto end;
-			}
-	#define CAMERA_MARGIN 15
-			if(x-Draw::cx<CAMERA_MARGIN)
-				Draw::cx-=CAMERA_MARGIN-(x-Draw::cx);
-			if(y-Draw::cy<CAMERA_MARGIN)
-				Draw::cy-=CAMERA_MARGIN-(y-Draw::cy);
-			if(Draw::cx+WSW-x<CAMERA_MARGIN)
-				Draw::cx+=CAMERA_MARGIN-(Draw::cx+WSW-x);
-			if(Draw::cy+WSH-y<CAMERA_MARGIN)
-				Draw::cy+=CAMERA_MARGIN-(Draw::cy+WSH-y);
-			x=newx;
-			y=newy;
-			end:;
-		}
+	moveTo(newx,newy,true);
+#define CAMERA_MARGIN 15
+	if(x-Draw::cx<CAMERA_MARGIN)
+		Draw::cx-=CAMERA_MARGIN-(x-Draw::cx);
+	if(y-Draw::cy<CAMERA_MARGIN)
+		Draw::cy-=CAMERA_MARGIN-(y-Draw::cy);
+	if(Draw::cx+WSW-x<CAMERA_MARGIN)
+		Draw::cx+=CAMERA_MARGIN-(Draw::cx+WSW-x);
+	if(Draw::cy+WSH-y<CAMERA_MARGIN)
+		Draw::cy+=CAMERA_MARGIN-(Draw::cy+WSH-y);
 	return ret;
 }
 
@@ -216,7 +176,7 @@ void Player::draw()
 	{
 #define STR(s) Draw::strg(s,WSW+2,n++)
 	case MAIN:
-		STR("<^>v     move");
+		STR("v<^>     move");
 		STR("eXamine      ");
 		STR("Inventory    ");
 		for(i=0;i<currentRoom->neighbors.size();i++)
@@ -229,6 +189,9 @@ void Player::draw()
 		}
 		if(i!=currentRoom->neighbors.size())
 			STR("Close door");
+		STR("");
+		STR("");
+		STR("Debug:");
 		STR("p  show rooms");
 		STR("WASD   camera");
 		STR("Esc      quit");
@@ -261,4 +224,20 @@ void Player::draw()
 		STR("BACKspace");
 		break;
 	}
+}
+
+bool Player::collidedWith( Object *obj )
+{
+	if(obj->isEnemy())
+	{
+		if(equipped==NULL)
+
+			console.console.push_back("You attack, but your fists are useless!");
+		else
+		{
+			equipped->attack((Enemy*)obj);
+		}
+		return 1;
+	}
+	return 0;
 }

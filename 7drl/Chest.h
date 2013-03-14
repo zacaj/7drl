@@ -11,7 +11,7 @@ public:
 
 	virtual bool update( int key );
 
-	virtual bool collidedWith( Player *player );
+	virtual bool collidedWith( Object *obj);
 
 };
 

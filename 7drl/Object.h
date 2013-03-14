@@ -20,9 +20,11 @@ public:
 	virtual bool update(int key)=0;
 	virtual void draw();
 	virtual bool isEnemy(){return 0;};
-	virtual bool collidedWith(Player *player){return 0;}
+	virtual bool collidedWith(Object *obj){return 0;}
+	void moveTo(int newx,int newy,bool canOpenDoors=0);
+	virtual bool isPlayer(){return 0;};
 
 };
 
-Object* objectAt(int x,int y);
+vector<Object*> objectAt(int x,int y);
 extern vector<Object*> objects;

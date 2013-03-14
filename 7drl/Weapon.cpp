@@ -25,8 +25,21 @@ Weapon::~Weapon(void)
 void Weapon::use(Player *player)
 {
 	if(player->equipped==this)
+	{
 		player->equipped=NULL;
+		console.console.push_back("Unequipped the "+name);
+	}
 	else
+	{
 		player->equipped=this;
+		console.console.push_back("Equipped the "+name);
+	}
 }
 
+
+std::string i2s( int i )
+{
+	char str[100];
+	sprintf_s(str,"%i",i);
+	return str;
+}
